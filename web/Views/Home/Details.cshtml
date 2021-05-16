@@ -1,0 +1,124 @@
+﻿@model BL.ViewModel.ProductViewModel
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>ProductViewModel</h4>
+    <hr />
+    <input type="text" id="PID" name="PID" value="@Model.Id" />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Quantity)
+        </dt>
+
+        <dd>
+
+            <span id="ProductQunatity">
+                @Html.DisplayFor(model => model.Quantity)
+            </span>
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Image)
+        </dt>
+
+        <dd>
+            <img src="~/Content/Img/@Html.DisplayFor(model => model.Image)" style="width:150px;height:150px" />
+
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Color)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Color)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CategoryID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CategoryID)
+        </dd>
+
+    </dl>
+    <input style="color:bisque" type="button" value="Add To Cart" id="btnBuy" class="btn btn-default" />
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
+<div>
+
+    <label>UserName</label>
+    <input type="text" id="username" name="username" />
+    <br />
+    <br />
+    <label>Comment</label>
+    <input type="text" id="Comment" />
+    <input type="button" value="Comment" id="Writecomment" style="margin-left:20px" />
+</div>
+<div style="margin-bottom:30px">
+    <h4>Comments:</h4>
+    <ul id="comments">
+    </ul>
+
+</div>
+@section scripts{
+    <script src="~/Scripts/jquery.signalR-2.4.1.js"></script>
+    <script src="~/signalr/js"></script>
+    <script>
+        var proxy = $.connection.ProductHub;
+
+        $.connection.hub.start().done(
+            function () {
+
+                console.log("Connected");
+
+                $("#Writecomment").click(function () {
+                    var name = $("#username").val();
+                    var comment = $("#Comment").val();
+                    var PID = $("#PID").val();
+
+                    proxy.server.WriteComment(name, comment, PID);
+                });
+
+                $("#btnBuy").click(function () {
+                    var PID = $("#PID").val();
+                    proxy.server.BuyProduct(PID);
+                });
+            });
+        //client call by server
+        proxy.client.Comment = function (username, comment, PID) {
+            if (PID == $("#PID").val())
+                $("#comments").append("<li><b>" + username + "</b>:" + comment + "</li>");
+
+        }
+        proxy.client.ReduceProductQuantity = function (PID, Quantity) {
+            console.log(Quantity);
+            $("#ProductQunatity").html(Quantity);
+        }
+    </script>
+}
